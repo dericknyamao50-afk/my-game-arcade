@@ -1,0 +1,3 @@
+body { text-align: center; background: #111; color: white; font-family: Arial; }
+canvas { background: #333; border: 4px solid yellow; }
+button { padding: 10px 20px; font-size: 18px; background: yellow; border: none; cursor: pointer; }
