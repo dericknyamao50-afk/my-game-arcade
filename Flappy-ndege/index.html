@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Flappy Ndege</title>
+<style>
+body { text-align: center; background: #111; color: white; font-family: Arial; }
+canvas { background: skyblue; border: 4px solid yellow; }
+button { padding: 10px 20px; font-size: 18px; background: yellow; border: none; cursor: pointer; }
+</style>
+</head>
+<body>
+<h1>🐦 FLAPPY NDEGE 🐦</h1>
+<p>Score: <span id="score">0</span> | Best: <span id="best">0</span></p>
+<p>Press SPACE or CLICK or TAP to FLAP!</p>
+<canvas id="game" width="400" height="500"></canvas>
+<p id="msg"></p>
+<button onclick="location.reload()">Play Again</button>
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+let birdY = 200, birdV = 0, gravity = 0.5;
+let pipes = [];
+let score = 0;
+let best = localStorage.getItem('flappyBest') || 0;
+document.getElementById('best').innerText = best;
+let gameOver = false;
+function flap() { if (!gameOver) birdV = -9; }
+document.addEventListener('keydown', e => { if (e.code === 'Space') flap(); });
+canvas.addEventListener('click', flap);
+function spawnPipe() {
+  let gap = 130;
+  let top = Math.random() * 250 + 50;
+  pipes.push({ x: 400, top: top, gap: gap, scored: false });
+}
+setInterval(spawnPipe, 1500);
+function update() {
+  if (gameOver) return;
+  birdV += gravity; birdY += birdV;
+  if (birdY < 0) birdY = 0;
+  if (birdY > 480) { endGame(); return; }
+  for (let i = pipes.length - 1; i >= 0; i--) {
+    pipes[i].x -= 3;
+    if (pipes[i].x < -60) { pipes.splice(i, 1); continue; }
+    // collision
+    if (50 + 30 > pipes[i].x && 50 < pipes[i].x + 50) {
+      if (birdY < pipes[i].top || birdY + 30 > pipes[i].top + pipes[i].gap) { endGame(); return; }
+    }
+    if (!pipes[i].scored && pipes[i].x + 50 < 50) { pipes[i].scored = true; score++; document.getElementById('score').innerText = score; }
+  }
+}
+function draw() {
+  ctx.fillStyle = "skyblue"; ctx.fillRect(0, 0, 400, 500);
+  ctx.fillStyle = "green";
+  for (let p of pipes) {
+    ctx.fillRect(p.x, 0, 50, p.top);
+    ctx.fillRect(p.x, p.top + p.gap, 50, 500 - p.top - p.gap);
+  }
+  ctx.fillStyle = "yellow";
+  ctx.fillRect(50, birdY, 30, 30);
+  ctx.fillStyle = "black"; ctx.font = "bold 10px Arial"; ctx.fillText("NDEGE", 50, birdY + 18);
+  ctx.fillStyle = "orange"; ctx.fillRect(75, birdY + 12, 10, 6);
+}
+function endGame() {
+  gameOver = true;
+  if (score > best) { best = score; localStorage.setItem('flappyBest', best); document.getElementById('best').innerText = best; }
+  document.getElementById('msg').innerText = "💥 NDEGE IMEANGUKA! Score: " + score;
+}
+function loop() { update(); draw(); if (!gameOver) requestAnimationFrame(loop); }
+loop();
+</script>
+</body>
+</html>
